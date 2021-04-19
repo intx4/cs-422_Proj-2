@@ -6,7 +6,7 @@ import lsh.MinHash
 class BaseConstruction(sqlContext: SQLContext, data: RDD[(String, List[String])], seed : Int) extends Construction {
   //build buckets here
   val minHash = new MinHash(seed)
-  val hashData = minHash.execute(data)
+  val hashData: RDD[(String, Int)] = minHash.execute(data)
   val buckets: RDD[(Int, Set[String])] = hashData.groupBy(f => f._2)
     .map(f => (f._1, f._2.map(t => t._1).toSet))
 

@@ -27,8 +27,13 @@ class ExactNN(sqlContext: SQLContext, data: RDD[(String, List[String])], thresho
     // Then filter those with sim >= thresh
     // After that if makes an RDD of form [Film1, Set(Film2)]
     // Finally it does a reduceByKey Film1 computing the union between the sets
+
+    /* Try this in case
     prod.map(f => (f._1._1, f._2._1, jaccard(f._1._2, f._2._2)))
     .filter(f => f._3 >= threshold).map(f => makeSet(f))
       .reduceByKey(_.union(_))
+    */
+    prod.map(f => (f._1._1, f._2._1, jaccard(f._1._2, f._2._2)))
+      .filter(f => f._3 >= threshold).groupBy(f => f._1).map(f => (f._1,f._2.map(t => t._2).toSet))
   }
 }
