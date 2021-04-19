@@ -11,10 +11,12 @@ class MinHash(seed : Int) extends Serializable {
     k = k >> 13
     k.abs
   }
-
+  def minhash (tags: List[String]): Int = {
+    val hashtags = tags.map(t => hashSeed(t, seed))
+    hashtags.min(Ordering[Int])
+  }
   def execute(data: RDD[(String, List[String])]) : RDD[(String, Int)] = {
     //compute minhash signature for each data/query point
-
-    null
+    data.map(f => (f._1, minhash(f._2)))
   }
 }
