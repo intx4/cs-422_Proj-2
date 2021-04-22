@@ -31,18 +31,18 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     var bounds = Array[Int]()
     var buffer = 0
     val depth = computeDepth(histogram)
-    val iter = histogram.iterator
-    var toAdd = 0
-    while (iter.hasNext){
-      val h = iter.next()
+
+    for (h <- histogram){
       buffer += h._2
       if (buffer > depth) {
         bounds :+= h._1
         buffer = 0
-        toAdd = h._1
       }
     }
-    bounds :+= toAdd
+    //see if one needs to add the last id of the histogram
+    if (histogram.last._1 != bounds.last){
+      bounds :+= histogram.last._1
+    }
     bounds
   }
   def assignPartition(bounds: Array[Int], id: Int):Int = {
