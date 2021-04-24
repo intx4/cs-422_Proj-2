@@ -2,6 +2,7 @@ package lsh
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
+import org.apache.spark.broadcast.Broadcast
 
 class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[String])], seed : Int, partitions : Int) extends Construction {
   //build buckets here
@@ -45,7 +46,7 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
       if (histogram.last._1 != bounds.last) {
         bounds :+= histogram.last._1
       }
-      bounds
+      return bounds
     }
     bounds
   }
@@ -54,6 +55,9 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     def assignPartition(bounds: Array[Int], id: Int): Int = {
       //ex: bounds = [2, 4, 5] meaning partitions are [0;2], (2;4], (4;5]
       // id = 3
+      if (bounds.isEmpty){
+        return 0
+      }
       var assigned = 0
       for (b <- bounds) {
         if (id > b) {
@@ -102,3 +106,5 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     result
   }
 }
+
+//TO DO: fix a non serializable bug here
