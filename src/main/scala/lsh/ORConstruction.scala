@@ -14,9 +14,12 @@ class ORConstruction(children: List[Construction]) extends Construction {
     }
 
     while (intermediateResults.length >= 2){
-      val res1 = intermediateResults.dequeue()
-      val res2 = intermediateResults.dequeue()
-      intermediateResults += res1.join(res2).map(f =>(f._1, f._2._1.union(f._2._2)))
+      // create an incrementing id and join on that, to force a 1:1 join between rows
+      val res1 = intermediateResults.dequeue().coalesce(1, shuffle = true)(QueriOrdering)
+        .zipWithIndex().map(f => (f._2, f._1))
+      val res2 = intermediateResults.dequeue().coalesce(1, shuffle = true)(QueriOrdering)
+        .zipWithIndex().map(f => (f._2, f._1))
+      intermediateResults += res1.join(res2).map(f => (f._2._1._1, f._2._1._2.union(f._2._2._2)))
     }
     intermediateResults.dequeue()
   }

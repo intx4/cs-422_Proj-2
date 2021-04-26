@@ -304,7 +304,7 @@ class MainTest extends FunSuite {
     val res2 = lsh2.eval(rdd_query)
     val res = lsh.eval(rdd_query)
 
-    assert(Main.recall(ground, res) > Main.recall(ground, res1))
+    assert(Main.recall(ground, res) >= Main.recall(ground, res1))
 
     assert(res.count() == rdd_query.count())
     assert(res.flatMap(x => x._2).count() > res1.flatMap(x => x._2).count())
