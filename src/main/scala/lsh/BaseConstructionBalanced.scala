@@ -2,7 +2,7 @@ package lsh
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.broadcast.Broadcast
+
 
 
 object MyFunctions {
@@ -88,10 +88,11 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     val histogram = computeMinHashHistogram(hashQueries)
     val bounds = computePartitions(histogram)
 
-    // each entry of this RDD is a List of queries belonging to the same partition
+    // each entry of this RDD is a List of queries as <film, minhash> belonging to the same partition
     val partitionedQueries: RDD[(Int, List[(String, Int)])] = hashQueries.sortBy(f => f._2)
       .groupBy(f => MyFunctions.assignPartition(bounds, f._2))
       .map(f => (f._1, f._2.toList))
+
     // each entry of this RDD is a List of <bucketId, List of films in bucket> belonging to same partition
     val partitionedBuckets: RDD[(Int, List[(Int, List[String])])] = buckets.sortBy(f => f._1)
       .groupBy(f => MyFunctions.assignPartition(bounds, f._1))

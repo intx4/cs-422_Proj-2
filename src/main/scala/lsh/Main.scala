@@ -43,8 +43,8 @@ object Main {
   def construction1(sqlContext: SQLContext, rdd_corpus : RDD[(String, List[String])]) : Construction = {
     //implement construction1 composition here
     var baseConstrs = List[BaseConstruction]()
-    var seed = 120
-    for (i <- 0 to 5) {
+    var seed = 42
+    for (i <- 0 to 6) {
       baseConstrs :+= new BaseConstruction(sqlContext, rdd_corpus, seed)
       seed += 1
     }
@@ -56,7 +56,7 @@ object Main {
     //implement construction2 composition here
     var baseConstrs = List[BaseConstruction]()
     var seed = 42
-    for (i <- 0 to 10) {
+    for (i <- 0 to 6) {
       baseConstrs :+= new BaseConstruction(sqlContext, rdd_corpus, seed)
       seed += 1
     }
