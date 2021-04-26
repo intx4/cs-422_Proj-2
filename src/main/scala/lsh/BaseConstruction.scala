@@ -18,7 +18,7 @@ class BaseConstruction(sqlContext: SQLContext, data: RDD[(String, List[String])]
     val hashQueries: RDD[(Int, String)] = minHash.execute(queries).map(f => (f._2, f._1))
 
     // result is ordered to enforce consistency in complex constructions
-    hashQueries.leftOuterJoin(buckets).map(f => (f._2._1, f._2._2))
-      .filter(f => f._2.nonEmpty).map(f => (f._1, f._2.get)).sortBy(f => f._1)
+    hashQueries.join(buckets).map(f => (f._2._1, f._2._2))
+      .sortBy(f => f._1)
   }
 }

@@ -22,7 +22,7 @@ class ExactNN(sqlContext: SQLContext, data: RDD[(String, List[String])], thresho
   }
   override def eval(rdd: RDD[(String, List[String])]): RDD[(String, Set[String])] = {
     //compute exact near neighbors here
-    val prod = data.cartesian(rdd)
+    val prod = rdd.cartesian(data)
     // First maps the RDD [Film1, Keyw1, Film2, Keyw2] => [Film1, Film2, sim]
     // Then filter those with sim >= thresh
     // After that if makes an RDD of form [Film1, Set(Film2)]

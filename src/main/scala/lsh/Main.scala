@@ -4,6 +4,8 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
 
+import scala.collection.mutable
+
 
 object Main {
   def generate(sc : SparkContext, input_file : String, output_file : String, fraction : Double) : Unit = {
@@ -40,17 +42,13 @@ object Main {
 
   def construction1(sqlContext: SQLContext, rdd_corpus : RDD[(String, List[String])]) : Construction = {
     //implement construction1 composition here
-    var andConstrs = List[ANDConstruction]()
-    for (j <- 0 to 6) {
-      var baseConstrs = List[BaseConstruction]()
-      var seed = 42 + 5 * j
-      for (i <- 0 to 4) {
-        baseConstrs :+= new BaseConstruction(sqlContext, rdd_corpus, seed)
-        seed += 1
-      }
-      andConstrs :+= new ANDConstruction(baseConstrs)
+    var baseConstrs = List[BaseConstruction]()
+    var seed = 120
+    for (i <- 0 to 5) {
+      baseConstrs :+= new BaseConstruction(sqlContext, rdd_corpus, seed)
+      seed += 1
     }
-    val lsh = new ANDConstruction(andConstrs)
+    val lsh = new ANDConstruction(baseConstrs)
     lsh
   }
 

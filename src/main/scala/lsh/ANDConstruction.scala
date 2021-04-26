@@ -2,33 +2,28 @@ package lsh
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable
+import scala.util.Random
 
 object QueriOrdering extends Ordering[(String, Set[String])] {
   def compare(a:(String, Set[String]), b:(String, Set[String])): Int = a._1.compareTo(b._1)
 }
 
 class ANDConstruction(children: List[Construction]) extends Construction {
+
   override def eval(rdd: RDD[(String, List[String])]): RDD[(String, Set[String])] = {
     //compute AND construction results here
-    // rdd is queries
-    val queries = rdd
-    //this queue should contain the results for each construction
-    var intermediateResults = mutable.Queue[RDD[(String, Set[String])]]()
+    // embed a unique key for handling duplicates in the queries
+    val rand = new Random(42)
+    val queries = rdd.map(f => (f._1+"__"+rand.nextString(8), f._2))
 
-    for (child <- children){
-      intermediateResults += child.eval(queries)
-    }
-
-    while (intermediateResults.length >= 2){
-      val res1 = intermediateResults.dequeue().coalesce(1, shuffle = true)(QueriOrdering)
-        .zipWithIndex().map(f => (f._2, f._1))
-      val res2 = intermediateResults.dequeue().coalesce(1, shuffle = true)(QueriOrdering)
-        .zipWithIndex().map(f => (f._2, f._1))
-      // restore the ordering for consistency
-      intermediateResults += res1.join(res2).
-        map(f => (f._2._1._1, f._2._1._2.intersect(f._2._2._2))).
-        sortBy(f => f._1)
-    }
-    intermediateResults.dequeue()
+    //Steps:
+      // 1 - collect all the results from children
+      // 2 - form a single RDD with union
+      // 3 - reduce by key (film to query + unique id) performing set intersection
+      // 4 - remove key
+    val intermediateResults = children.map(f => f.eval(queries))
+      .reduce(_.union(_)).reduceByKey(_.intersect(_))
+      .map(f => (f._1.split("__").head, f._2))
+    intermediateResults
   }
 }
