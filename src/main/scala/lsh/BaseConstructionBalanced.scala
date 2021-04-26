@@ -4,6 +4,37 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.broadcast.Broadcast
 
+
+object MyFunctions {
+  def assignPartition(bounds: Array[Int], id: Int): Int = {
+    //ex: bounds = [2, 4, 5] meaning partitions are [0;2], (2;4], (4;5]
+    // id = 3
+    if (bounds.isEmpty){
+      return 0
+    }
+    var assigned = 0
+    for (b <- bounds) {
+      if (id > b) {
+        assigned = assigned + 1
+      }
+      else {
+        return assigned
+      }
+    }
+    assigned
+  }
+
+  def partitionJoin(queries: List[(String, Int)], buckets: List[(Int, List[String])]): List[(String, Set[String])] = {
+    //for each query in partition, extract the bucket from the partition and return the films in there
+    var joinRes = List[(String, Set[String])]()
+    for (query <- queries) {
+      val neighs = buckets.filter(p => p._1 == query._2).flatMap(f => f._2).toSet
+      joinRes = joinRes :+ (query._1, neighs)
+    }
+    joinRes
+  }
+}
+
 class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[String])], seed : Int, partitions : Int) extends Construction {
   //build buckets here
   val minHash = new MinHash(seed)
@@ -50,37 +81,6 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     }
     bounds
   }
-
-  object MyFunctions {
-    def assignPartition(bounds: Array[Int], id: Int): Int = {
-      //ex: bounds = [2, 4, 5] meaning partitions are [0;2], (2;4], (4;5]
-      // id = 3
-      if (bounds.isEmpty){
-        return 0
-      }
-      var assigned = 0
-      for (b <- bounds) {
-        if (id > b) {
-          assigned = assigned + 1
-        }
-        else {
-          return assigned
-        }
-      }
-      assigned
-    }
-
-    def partionJoin(queries: List[(String, Int)], buckets: List[(Int, List[String])]): List[(String, Set[String])] = {
-      //for each query in partition, extract the bucket from the partition and return the films in there
-      var joinRes = List[(String, Set[String])]()
-      for (query <- queries) {
-        val neighs = buckets.filter(p => p._1 == query._2).flatMap(f => f._2).toSet
-        joinRes = joinRes :+ (query._1, neighs)
-      }
-      joinRes
-    }
-  }
-
   override def eval(queries: RDD[(String, List[String])]): RDD[(String, Set[String])] = {
     //compute near neighbors with load balancing here
     //note that both buckets and queries are sorted by minHash ASC
@@ -101,7 +101,7 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     val joinedRdd = partitionedQueries.join(partitionedBuckets).map(f => (f._2._1, f._2._2))
 
     //see partionJoin
-    val result = joinedRdd.flatMap(f => MyFunctions.partionJoin(f._1, f._2))
+    val result = joinedRdd.flatMap(f => MyFunctions.partitionJoin(f._1, f._2))
 
     result
   }
