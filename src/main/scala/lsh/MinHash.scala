@@ -17,7 +17,6 @@ class MinHash(seed : Int) extends Serializable {
   }
   def execute(data: RDD[(String, List[String])]) : RDD[(String, Int)] = {
     // compute minhash signature for each data/query point
-
     data.map(f => (f._1, minhash(f._2)))
   }
 }

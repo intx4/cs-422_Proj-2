@@ -38,16 +38,32 @@ object Main {
     avg_precision
   }
 
-  def construction1(SQLContext: SQLContext, rdd_corpus : RDD[(String, List[String])]) : Construction = {
+  def construction1(sqlContext: SQLContext, rdd_corpus : RDD[(String, List[String])]) : Construction = {
     //implement construction1 composition here
-
-    null
+    var andConstrs = List[ANDConstruction]()
+    for (j <- 0 to 6) {
+      var baseConstrs = List[BaseConstruction]()
+      var seed = 42 + 5 * j
+      for (i <- 0 to 4) {
+        baseConstrs :+= new BaseConstruction(sqlContext, rdd_corpus, seed)
+        seed += 1
+      }
+      andConstrs :+= new ANDConstruction(baseConstrs)
+    }
+    val lsh = new ANDConstruction(andConstrs)
+    lsh
   }
 
-  def construction2(SQLContext: SQLContext, rdd_corpus : RDD[(String, List[String])]) : Construction = {
+  def construction2(sqlContext: SQLContext, rdd_corpus : RDD[(String, List[String])]) : Construction = {
     //implement construction2 composition here
-
-    null
+    var baseConstrs = List[BaseConstruction]()
+    var seed = 42
+    for (i <- 0 to 10) {
+      baseConstrs :+= new BaseConstruction(sqlContext, rdd_corpus, seed)
+      seed += 1
+    }
+    val lsh = new ORConstruction(baseConstrs)
+    lsh
   }
 
   def main(args: Array[String]) {
