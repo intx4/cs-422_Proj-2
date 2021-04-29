@@ -18,6 +18,8 @@ libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.1"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % Test
 
+libraryDependencies += "au.com.bytecode" % "opencsv" % "2.4"
+
 libraryDependencies ++= Seq(
   "junit" % "junit" % "4.8.1" % "test"
 )

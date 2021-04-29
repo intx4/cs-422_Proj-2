@@ -37,12 +37,14 @@ object MyFunctions {
 
   def partitionJoin(queries: List[(String, Int)], buckets: List[(Int, List[String])]): List[(String, Set[String])] = {
     //for each query in partition, extract the bucket from the partition and return the films in there
-    var joinRes = List[(String, Set[String])]()
+    /*
     for (query <- queries) {
       val neighs = buckets.filter(p => p._1 == query._2).flatMap(f => f._2).toSet
       joinRes = joinRes :+ (query._1, neighs)
     }
     joinRes
+     */
+    queries.map(f => (f._1, buckets.filter(p => p._1 == f._2).flatMap(p => p._2).toSet))
   }
 }
 
@@ -105,20 +107,20 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     val partitionedQueries: RDD[(Int, List[(String, Int)])] = hashQueries.sortBy(f => f._2)
       .groupBy(f => MyFunctions.assignPartition(bounds, f._2))
       .map(f => (f._1, f._2.toList))
-      .sortBy(f => f._1).partitionBy(partitioner)
+      .partitionBy(partitioner)
 
     // each entry of this RDD is a List of <bucketId, List of films in bucket> belonging to same partition
     val partitionedBuckets: RDD[(Int, List[(Int, List[String])])] = buckets.sortBy(f => f._1)
       .groupBy(f => MyFunctions.assignPartition(bounds, f._1))
       .map(f => (f._1, f._2.map(t => (t._1,t._2.toList)).toList))
-      .sortBy(f => f._1).partitionBy(partitioner)
+      .partitionBy(partitioner)
 
     // each entry is a List of queries<Film, hash> followed by a bucket <hash, List[films] >
-    val joinedRdd = partitionedQueries.join(partitionedBuckets).map(f => (f._2._1, f._2._2))
+    val joinedRdd = partitionedQueries.join(partitionedBuckets)
+      .map(f => (f._2._1, f._2._2))
 
-    //see partionJoin
+    //see partitionJoin
     val result = joinedRdd.flatMap(f => MyFunctions.partitionJoin(f._1, f._2))
-
     result
   }
 }
