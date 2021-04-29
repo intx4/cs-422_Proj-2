@@ -89,29 +89,29 @@ object Main {
   //----------------------------------------------------TASK 8 TESTS-------------------------------------------------
   def test_exactnn_runtime(): Unit = {
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-1.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-10.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-20.csv/part-00000"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2-skew.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10-skew.csv/part-00000"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2-skew.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10-skew.csv/part-00000"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2-skew.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10-skew.csv/part-00000"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/exactnn_time.csv"))
@@ -151,29 +151,29 @@ object Main {
   //@Test
   def test_base_constr_time(): Unit = {
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-1.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-10.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-20.csv/part-00000"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2-skew.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10-skew.csv/part-00000"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2-skew.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10-skew.csv/part-00000"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2-skew.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10-skew.csv/part-00000"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/basecon_time.csv"))
@@ -213,29 +213,29 @@ object Main {
 
   def test_balanced_constr_time() : Unit = {
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-1.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-10.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-20.csv/part-00000"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2-skew.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10-skew.csv/part-00000"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2-skew.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10-skew.csv/part-00000"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2-skew.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10-skew.csv/part-00000"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/balancedconstr_time.csv"))
@@ -274,29 +274,29 @@ object Main {
 
   def test_broadcast_constr_time() : Unit = {
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-1.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-10.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-20.csv/part-00000"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2-skew.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10-skew.csv/part-00000"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2-skew.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10-skew.csv/part-00000"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2-skew.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10-skew.csv/part-00000"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/broadcastconstr_time.csv"))
@@ -336,29 +336,29 @@ object Main {
 
   def test_average_dinstance() : Unit = {
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-1.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-10.csv/part-00000"
+    corpus_files :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-20.csv/part-00000"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-2-skew.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10.csv/part-00000"
+    query_file_1 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-1-10-skew.csv/part-00000"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-2-skew.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10.csv/part-00000"
+    query_file_10 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-10-10-skew.csv/part-00000"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-2-skew.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10.csv/part-00000"
+    query_file_20 :+= "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-20-10-skew.csv/part-00000"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/average_distance.csv"))
@@ -450,8 +450,8 @@ object Main {
   }
 
   def main(args: Array[String]) {
-    //test_exactnn_runtime()
-    //test_base_constr_time()
+    test_exactnn_runtime()
+    test_base_constr_time()
     test_balanced_constr_time()
     test_broadcast_constr_time()
     test_average_dinstance()

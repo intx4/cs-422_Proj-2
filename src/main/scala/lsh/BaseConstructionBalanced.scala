@@ -5,21 +5,10 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 
 
-class BalancedPartitioner(partitions: Int) extends Partitioner{
+class BalancedPartitioner(partitions: Int, bounds: Array[Int]) extends Partitioner with Serializable {
   override def numPartitions: Int = partitions
   override def getPartition(key: Any): Int = {
-    var value = key.asInstanceOf[Int]
-    if (value > numPartitions - 1){
-      value = numPartitions - 1
-    }
-    value
-  }
-}
-
-object MyFunctions {
-  def assignPartition(bounds: Array[Int], id: Int): Int = {
-    //ex: bounds = [2, 4, 5] meaning partitions are [0;2], (2;4], (4;5]
-    // id = 3
+    val id = key.asInstanceOf[Int]
     if (bounds.isEmpty){
       return 0
     }
@@ -29,32 +18,27 @@ object MyFunctions {
         assigned = assigned + 1
       }
       else {
-        return assigned
+        if (assigned > partitions - 1){
+          return partitions - 1
+        }
+        else {
+          return assigned
+        }
       }
     }
-    assigned
-  }
-
-  def partitionJoin(queries: List[(String, Int)], buckets: List[(Int, List[String])]): List[(String, Set[String])] = {
-    //for each query in partition, extract the bucket from the partition and return the films in there
-    /*
-    for (query <- queries) {
-      val neighs = buckets.filter(p => p._1 == query._2).flatMap(f => f._2).toSet
-      joinRes = joinRes :+ (query._1, neighs)
+    if (assigned > partitions - 1){
+      return partitions - 1
     }
-    joinRes
-     */
-    queries.map(f => (f._1, buckets.filter(p => p._1 == f._2).flatMap(p => p._2).toSet))
+    else {
+      return assigned
+    }
   }
 }
-
 class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[String])], seed : Int, partitions : Int) extends Construction {
   //build buckets here
   val minHash = new MinHash(seed)
   val buckets: RDD[(Int, Set[String])] = minHash.execute(data).groupBy(f => f._2)
     .map(f => (f._1, f._2.map(t => t._1).toSet)).sortBy(f => f._1, ascending = true)
-
-  val partitioner = new BalancedPartitioner(partitions)
 
   def computeMinHashHistogram(queries: RDD[(String, Int)]): Array[(Int, Int)] = {
     // compute histogram for target buckets of queries
@@ -96,6 +80,7 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     }
     bounds
   }
+
   override def eval(queries: RDD[(String, List[String])]): RDD[(String, Set[String])] = {
     //compute near neighbors with load balancing here
     //note that both buckets and queries are sorted by minHash ASC
@@ -103,24 +88,23 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     val histogram = computeMinHashHistogram(hashQueries)
     val bounds = computePartitions(histogram)
 
+    val partitioner = new BalancedPartitioner(partitions, bounds)
+
     // each entry of this RDD is a List of queries as <film, minhash> belonging to the same partition
-    val partitionedQueries: RDD[(Int, List[(String, Int)])] = hashQueries.sortBy(f => f._2)
-      .groupBy(f => MyFunctions.assignPartition(bounds, f._2))
-      .map(f => (f._1, f._2.toList))
+    val partitionedQueries: RDD[(Int, String)] = hashQueries
+      .map(f => (f._2, f._1))
       .partitionBy(partitioner)
 
     // each entry of this RDD is a List of <bucketId, List of films in bucket> belonging to same partition
-    val partitionedBuckets: RDD[(Int, List[(Int, List[String])])] = buckets.sortBy(f => f._1)
-      .groupBy(f => MyFunctions.assignPartition(bounds, f._1))
-      .map(f => (f._1, f._2.map(t => (t._1,t._2.toList)).toList))
+    val partitionedBuckets: RDD[(Int, Set[String])] = buckets
       .partitionBy(partitioner)
 
     // each entry is a List of queries<Film, hash> followed by a bucket <hash, List[films] >
-    val joinedRdd = partitionedQueries.join(partitionedBuckets)
+    val joinedRdd = partitionedQueries
+      .join(partitionedBuckets)
       .map(f => (f._2._1, f._2._2))
 
     //see partitionJoin
-    val result = joinedRdd.flatMap(f => MyFunctions.partitionJoin(f._1, f._2))
-    result
+    joinedRdd
   }
 }
