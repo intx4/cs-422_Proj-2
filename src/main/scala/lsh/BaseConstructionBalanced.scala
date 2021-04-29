@@ -1,9 +1,20 @@
 package lsh
 
+import org.apache.spark.Partitioner
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 
 
+class BalancedPartitioner(partitions: Int) extends Partitioner{
+  override def numPartitions: Int = partitions
+  override def getPartition(key: Any): Int = {
+    var value = key.asInstanceOf[Int]
+    if (value > numPartitions - 1){
+      value = numPartitions - 1
+    }
+    value
+  }
+}
 
 object MyFunctions {
   def assignPartition(bounds: Array[Int], id: Int): Int = {
@@ -40,6 +51,8 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
   val minHash = new MinHash(seed)
   val buckets: RDD[(Int, Set[String])] = minHash.execute(data).groupBy(f => f._2)
     .map(f => (f._1, f._2.map(t => t._1).toSet)).sortBy(f => f._1, ascending = true)
+
+  val partitioner = new BalancedPartitioner(partitions)
 
   def computeMinHashHistogram(queries: RDD[(String, Int)]): Array[(Int, Int)] = {
     // compute histogram for target buckets of queries
@@ -92,11 +105,13 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     val partitionedQueries: RDD[(Int, List[(String, Int)])] = hashQueries.sortBy(f => f._2)
       .groupBy(f => MyFunctions.assignPartition(bounds, f._2))
       .map(f => (f._1, f._2.toList))
+      .sortBy(f => f._1).partitionBy(partitioner)
 
     // each entry of this RDD is a List of <bucketId, List of films in bucket> belonging to same partition
     val partitionedBuckets: RDD[(Int, List[(Int, List[String])])] = buckets.sortBy(f => f._1)
       .groupBy(f => MyFunctions.assignPartition(bounds, f._1))
       .map(f => (f._1, f._2.map(t => (t._1,t._2.toList)).toList))
+      .sortBy(f => f._1).partitionBy(partitioner)
 
     // each entry is a List of queries<Film, hash> followed by a bucket <hash, List[films] >
     val joinedRdd = partitionedQueries.join(partitionedBuckets).map(f => (f._2._1, f._2._2))
@@ -107,5 +122,3 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     result
   }
 }
-
-//TO DO: fix a non serializable bug here

@@ -2,9 +2,8 @@ package lsh
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.udf
+
 
 //define a wrapper object to make func serializable by spark
 object MyFunctionsBC {

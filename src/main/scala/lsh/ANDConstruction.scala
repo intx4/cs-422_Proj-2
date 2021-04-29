@@ -12,7 +12,7 @@ class ANDConstruction(children: List[Construction]) extends Construction {
 
   override def eval(rdd: RDD[(String, List[String])]): RDD[(String, Set[String])] = {
     //compute AND construction results here
-    // embed a unique key for handling duplicates in the queries
+    // embed a unique key for handling duplicates in the queries: query = Film+key, keywords
     val rand = new Random(42)
     val queries = rdd.map(f => (f._1+"__"+rand.nextString(8), f._2))
 
