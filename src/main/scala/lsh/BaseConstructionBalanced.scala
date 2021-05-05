@@ -37,14 +37,16 @@ class BalancedPartitioner(partitions: Int, bounds: Array[Int]) extends Partition
 class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[String])], seed : Int, partitions : Int) extends Construction {
   //build buckets here
   val minHash = new MinHash(seed)
-  val buckets: RDD[(Int, Set[String])] = minHash.execute(data).groupBy(f => f._2)
-    .map(f => (f._1, f._2.map(t => t._1).toSet)).sortBy(f => f._1, ascending = true)
+  val buckets: RDD[(Int, Set[String])] = minHash.execute(data)
+    .groupBy{case (name, id) => id}
+    .mapValues(f => f.map(_._1).toSet)
+    .cache()
 
   def computeMinHashHistogram(queries: RDD[(String, Int)]): Array[(Int, Int)] = {
     // compute histogram for target buckets of queries
     // return histogram sorted by hashmin key ASC as <id, number>
-    queries.groupBy(f => f._2).map(f => (f._1, f._2.toArray.length))
-      .sortBy(f => f._1, ascending = true).collect()
+    queries.groupBy(f => f._2).mapValues(f => f.toArray.length)
+      .sortByKey(ascending = true).collect()
   }
 
   def computeDepth(histogram: Array[(Int, Int)]): Int = {
@@ -83,7 +85,6 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
 
   override def eval(queries: RDD[(String, List[String])]): RDD[(String, Set[String])] = {
     //compute near neighbors with load balancing here
-    //note that both buckets and queries are sorted by minHash ASC
     val hashQueries = minHash.execute(queries)
     val histogram = computeMinHashHistogram(hashQueries)
     val bounds = computePartitions(histogram)
@@ -92,7 +93,7 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
 
     // each entry of this RDD is a List of queries as <film, minhash> belonging to the same partition
     val partitionedQueries: RDD[(Int, String)] = hashQueries
-      .map(f => (f._2, f._1))
+      .map(f => f.swap)
       .partitionBy(partitioner)
 
     // each entry of this RDD is a List of <bucketId, List of films in bucket> belonging to same partition
@@ -102,7 +103,7 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     // each entry is a List of queries<Film, hash> followed by a bucket <hash, List[films] >
     val joinedRdd = partitionedQueries
       .join(partitionedBuckets)
-      .map(f => (f._2._1, f._2._2))
+      .map{ case (id, (qname, neighs)) => (qname, neighs)}
 
     //see partitionJoin
     joinedRdd

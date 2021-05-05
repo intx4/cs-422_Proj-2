@@ -22,7 +22,8 @@ class ANDConstruction(children: List[Construction]) extends Construction {
       // 3 - reduce by key (film to query + unique id) performing set intersection
       // 4 - remove key
     val intermediateResults = children.map(f => f.eval(queries))
-      .reduce(_.union(_)).reduceByKey(_.intersect(_))
+      .reduce(_.union(_))
+        .reduceByKey(_.intersect(_))
       .map(f => (f._1.split("__").head, f._2))
     intermediateResults
   }

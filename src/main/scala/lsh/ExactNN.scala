@@ -22,7 +22,7 @@ class ExactNN(sqlContext: SQLContext, data: RDD[(String, List[String])], thresho
     // First maps the RDD [Film1, Keyw1, Film2, Keyw2] => [Film1, Film2, sim]
     // Then filter those with sim >= thresh
     // After that it makes an RDD of form [Film1, Set(Film2)]
-    prod.map(f => (f._1._1, f._2._1, jaccard(f._1._2, f._2._2)))
-      .filter(f => f._3 >= threshold).groupBy(f => f._1).map(f => (f._1,f._2.map(t => t._2).toSet))
+    prod.map{case ((qname,qkeyw), (nname, nkeyw)) => (qname, (nname, jaccard(qkeyw, nkeyw)))}
+      .filter{case (qname, (nname, jac)) => jac > threshold}.groupByKey().mapValues(f => f.map(_._1).toSet)
   }
 }

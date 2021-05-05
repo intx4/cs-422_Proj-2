@@ -9,7 +9,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 import au.com.bytecode.opencsv.CSVWriter
-import lsh.Main.{average, jaccard, sc, sqlContext}
+import lsh.Main.{jaccard, sc, sqlContext}
 
 class MainTest extends FunSuite {
   val master = "local[*]"
@@ -417,33 +417,42 @@ class MainTest extends FunSuite {
     assert(Main.recall(ground, res) > 0.95)
   }
   //---------------------------------------------------TASK 8 Tests------------------------------------------------------
+  /*
+  def computeAverage(rdd: RDD[(String, Set[String])], corpus: RDD[(String, List[String])],  queries: RDD[(String, List[String])]) : Double = {
+    rdd = rdd.flatMapValues(f => f.toList)
+    val df = spark.createDataFrame(rdd)
+    val corpus_df = spark.createDataFrame(corpus)
+    val queries_df = spark.createDataFrame(queries)
+
+  }
+  */
 
   //@Test
   test("ExactNN Runtime") {
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-1.csv"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-10.csv"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-20.csv"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2.csv"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2-skew.csv"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10.csv"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10-skew.csv"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2.csv"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2-skew.csv"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10.csv"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10-skew.csv"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2.csv"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2-skew.csv"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10.csv"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10-skew.csv"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/exactnn_time.csv"))
@@ -452,28 +461,34 @@ class MainTest extends FunSuite {
     var listOfRecords = new ListBuffer[Array[String]]()
     listOfRecords += csvSchema
 
-    for (i <- corpus_files.indices) {
-      for (query_file <- query_files(i)) {
+    for (j <- 0 until(10)) {
+      for (i <- corpus_files.indices) {
+        for (query_file <- query_files(i)) {
 
-        val corpus_file = corpus_files(i)
-        val rdd_corpus = spark.sparkContext
-          .textFile(corpus_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
+          val corpus_file = corpus_files(i)
+          val rdd_corpus = spark.sparkContext
+            .textFile(corpus_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
 
-        val rdd_query = spark.sparkContext
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
+          val rdd_query = spark.sparkContext
+            .textFile(query_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
-        val exact = new ExactNN(spark.sqlContext, rdd_corpus, 0.3)
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query)
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
+          val exact = new ExactNN(spark.sqlContext, rdd_corpus, 0.3)
+          val tic = System.nanoTime()
+          val ground = exact.eval(rdd_query).count()
+          val toc = System.nanoTime()
+          val duration = (toc - tic) / 1e9d
+          print(corpus_file, query_file, duration.toString)
 
-        listOfRecords += Array(corpus_file, query_file, duration.toString)
+          listOfRecords += Array(corpus_file, query_file, duration.toString)
+          rdd_corpus.unpersist()
+          rdd_query.unpersist()
+          spark.catalog.clearCache()
+        }
       }
     }
     csvWriter.writeAll(listOfRecords.toList)
@@ -482,30 +497,31 @@ class MainTest extends FunSuite {
 
   //@Test
   test("BaseConstruction Runtime") {
+
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-1.csv"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-10.csv"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-20.csv"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2.csv"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2-skew.csv"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10.csv"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10-skew.csv"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2.csv"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2-skew.csv"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10.csv"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10-skew.csv"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2.csv"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2-skew.csv"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10.csv"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10-skew.csv"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/basecon_time.csv"))
@@ -514,28 +530,30 @@ class MainTest extends FunSuite {
     var listOfRecords = new ListBuffer[Array[String]]()
     listOfRecords += csvSchema
 
-    for (i <- corpus_files.indices) {
-      for (query_file <- query_files(i)) {
+    for (j <- 0 until(10)) {
+      for (i <- corpus_files.indices) {
+        for (query_file <- query_files(i)) {
 
-        val corpus_file = corpus_files(i)
-        val rdd_corpus = spark.sparkContext
-          .textFile(corpus_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
+          val corpus_file = corpus_files(i)
+          val rdd_corpus = spark.sparkContext
+            .textFile(corpus_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
 
-        val rdd_query = spark.sparkContext
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
+          val rdd_query = spark.sparkContext
+            .textFile(query_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
-        val exact = new BaseConstruction(spark.sqlContext, rdd_corpus, 42)
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query)
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
+          val exact = new BaseConstruction(spark.sqlContext, rdd_corpus, 42)
+          val tic = System.nanoTime()
+          val ground = exact.eval(rdd_query)
+          val toc = System.nanoTime()
+          val duration = (toc - tic) / 1e9d
 
-        listOfRecords += Array(corpus_file, query_file, duration.toString)
+          listOfRecords += Array(corpus_file, query_file, duration.toString)
+        }
       }
     }
     csvWriter.writeAll(listOfRecords.toList)
@@ -543,30 +561,31 @@ class MainTest extends FunSuite {
   }
 
   test("BalancedConstr Runtime") {
+
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-1.csv/part-00000"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-10.csv/part-00000"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-20.csv/part-00000"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2.csv/part-00000"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2-skew.csv/part-00000"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10.csv/part-00000"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10-skew.csv/part-00000"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2.csv/part-00000"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2-skew.csv/part-00000"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10.csv/part-00000"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10-skew.csv/part-00000"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2.csv/part-00000"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2-skew.csv/part-00000"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10.csv/part-00000"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10-skew.csv/part-00000"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/balancedconstr_time.csv"))
@@ -575,28 +594,30 @@ class MainTest extends FunSuite {
     var listOfRecords = new ListBuffer[Array[String]]()
     listOfRecords += csvSchema
 
-    for (i <- corpus_files.indices) {
-      for (query_file <- query_files(i)) {
+    for (j <- 0 until(10)) {
+      for (i <- corpus_files.indices) {
+        for (query_file <- query_files(i)) {
 
-        val corpus_file = corpus_files(i)
-        val rdd_corpus = spark.sparkContext
-          .textFile(corpus_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
+          val corpus_file = corpus_files(i)
+          val rdd_corpus = spark.sparkContext
+            .textFile(corpus_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
 
-        val rdd_query = spark.sparkContext
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
+          val rdd_query = spark.sparkContext
+            .textFile(query_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
-        val exact = new BaseConstructionBalanced(spark.sqlContext, rdd_corpus, 42, partitions = 8)
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query)
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
+          val exact = new BaseConstructionBalanced(spark.sqlContext, rdd_corpus, 42, partitions = 8)
+          val tic = System.nanoTime()
+          val ground = exact.eval(rdd_query)
+          val toc = System.nanoTime()
+          val duration = (toc - tic) / 1e9d
 
-        listOfRecords += Array(corpus_file, query_file, duration.toString)
+          listOfRecords += Array(corpus_file, query_file, duration.toString)
+        }
       }
     }
     csvWriter.writeAll(listOfRecords.toList)
@@ -604,30 +625,31 @@ class MainTest extends FunSuite {
   }
 
   test("BroadcastConstr Runtime") {
+
     var corpus_files = List[String]()
-    corpus_files :+= new File(getClass.getResource("/corpus-1.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-10.csv/part-00000").getFile).getPath
-    corpus_files :+= new File(getClass.getResource("/corpus-20.csv/part-00000").getFile).getPath
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-1.csv/part-00000"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-10.csv/part-00000"
+    corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-20.csv/part-00000"
 
     var query_files = List[List[String]]()
 
     var query_file_1 = List[String]()
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-2-skew.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10.csv/part-00000").getFile).getPath
-    query_file_1 :+= new File(getClass.getResource("/queries-1-10-skew.csv/part-00000").getFile).getPath
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2.csv/part-00000"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-2-skew.csv/part-00000"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10.csv/part-00000"
+    query_file_1 :+= "/home/intx/cs-422/bis/src/main/resources/queries-1-10-skew.csv/part-00000"
     query_files :+= query_file_1
     var query_file_10 = List[String]()
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-2-skew.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10.csv/part-00000").getFile).getPath
-    query_file_10 :+= new File(getClass.getResource("/queries-10-10-skew.csv/part-00000").getFile).getPath
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2.csv/part-00000"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-2-skew.csv/part-00000"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10.csv/part-00000"
+    query_file_10 :+= "/home/intx/cs-422/bis/src/main/resources/queries-10-10-skew.csv/part-00000"
     query_files :+= query_file_10
     var query_file_20 = List[String]()
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-2-skew.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10.csv/part-00000").getFile).getPath
-    query_file_20 :+= new File(getClass.getResource("/queries-20-10-skew.csv/part-00000").getFile).getPath
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2.csv/part-00000"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-2-skew.csv/part-00000"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10.csv/part-00000"
+    query_file_20 :+= "/home/intx/cs-422/bis/src/main/resources/queries-20-10-skew.csv/part-00000"
     query_files :+= query_file_20
 
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/broadcastconstr_time.csv"))
@@ -636,29 +658,31 @@ class MainTest extends FunSuite {
     var listOfRecords = new ListBuffer[Array[String]]()
     listOfRecords += csvSchema
 
-    for (i <- corpus_files.indices) {
-      for (query_file <- query_files(i)) {
+    for (j <- 0 until(10)) {
+      for (i <- corpus_files.indices) {
+        for (query_file <- query_files(i)) {
 
-        val corpus_file = corpus_files(i)
-        val rdd_corpus = spark.sparkContext
-          .textFile(corpus_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
-
-
-        val rdd_query = spark.sparkContext
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
+          val corpus_file = corpus_files(i)
+          val rdd_corpus = spark.sparkContext
+            .textFile(corpus_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
 
-        val exact = new BaseConstructionBroadcast(spark.sqlContext, rdd_corpus, 42)
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query)
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
+          val rdd_query = spark.sparkContext
+            .textFile(query_file)
+            .map(x => x.toString.split('|'))
+            .map(x => (x(0), x.slice(1, x.size).toList))
 
-        listOfRecords += Array(corpus_file, query_file, duration.toString)
+
+          val exact = new BaseConstructionBroadcast(spark.sqlContext, rdd_corpus, 42)
+          val tic = System.nanoTime()
+          val ground = exact.eval(rdd_query)
+          val toc = System.nanoTime()
+          val duration = (toc - tic) / 1e9d
+
+          listOfRecords += Array(corpus_file, query_file, duration.toString)
+        }
       }
     }
     csvWriter.writeAll(listOfRecords.toList)
@@ -729,57 +753,69 @@ class MainTest extends FunSuite {
         val broadcast = new BaseConstructionBroadcast(sqlContext, rdd_corpus, 42)
         val broadcast_res = broadcast.eval(rdd_query)
 
-        var exact_d = average(exact_res.flatMapValues(f => f.toList)
-          .sample(withReplacement = false, fraction = 0.25)
+        var tup = exact_res.flatMapValues(f => f.toList)
+          .sample(withReplacement = false, fraction = 0.01)
           .join(rdd_query)
           .map(f => (f._2._1, (f._1, f._2._2)))
           .join(rdd_corpus)
           .map(f => (f._2._1._1, f._1, f._2._1._2, f._2._2))
-          .map(f => (f._1, f._2, jaccard(f._3, f._4)))
-          .groupBy(f => f._1)
-          .map(f => average(f._2.map(t => t._3).toList))
-          .collect().toList)
+          .map(f => (f._1,(jaccard(f._3, f._4), 1)))
+          .reduceByKey((f,t) => (f._1+t._1, f._2+t._2))
+          .map(f => (f._2._1/f._2._2,1))
+          .reduce((f,t) => (f._1+t._1, f._2+t._2))
+        exact_res.unpersist()
+        val exact_d = tup._1 / tup._2
 
-        var base_d = average(base_res.flatMapValues(f => f.toList)
-          .sample(withReplacement = false, fraction = 0.25)
+        tup = base_res.flatMapValues(f => f.toList)
+          .sample(withReplacement = false, fraction = 0.01)
           .join(rdd_query)
           .map(f => (f._2._1, (f._1, f._2._2)))
           .join(rdd_corpus)
           .map(f => (f._2._1._1, f._1, f._2._1._2, f._2._2))
-          .map(f => (f._1, f._2, jaccard(f._3, f._4)))
-          .groupBy(f => f._1)
-          .map(f => average(f._2.map(t => t._3).toList))
-          .collect().toList)
+          .map(f => (f._1,(jaccard(f._3, f._4), 1)))
+          .reduceByKey((f,t) => (f._1+t._1, f._2+t._2))
+          .map(f => (f._2._1/f._2._2,1))
+          .reduce((f,t) => (f._1+t._1, f._2+t._2))
+        base_res.unpersist()
+        val base_d = tup._1 / tup._2
 
-        var balanced_d = average(balanced_res.flatMapValues(f => f.toList)
-          .sample(withReplacement = false, fraction = 0.25)
+        tup = balanced_res.flatMapValues(f => f.toList)
+          .sample(withReplacement = false, fraction = 0.01)
           .join(rdd_query)
           .map(f => (f._2._1, (f._1, f._2._2)))
           .join(rdd_corpus)
           .map(f => (f._2._1._1, f._1, f._2._1._2, f._2._2))
-          .map(f => (f._1, f._2, jaccard(f._3, f._4)))
-          .groupBy(f => f._1)
-          .map(f => average(f._2.map(t => t._3).toList))
-          .collect().toList)
+          .map(f => (f._1,(jaccard(f._3, f._4), 1)))
+          .reduceByKey((f,t) => (f._1+t._1, f._2+t._2))
+          .map(f => (f._2._1/f._2._2,1))
+          .reduce((f,t) => (f._1+t._1, f._2+t._2))
+        balanced_res.unpersist()
+        val balanced_d = tup._1/ tup._2
 
-        var broadcast_d = average(broadcast_res.flatMapValues(f => f.toList)
-          .sample(withReplacement = false, fraction = 0.25)
+        tup = broadcast_res.flatMapValues(f => f.toList)
+          .sample(withReplacement = false, fraction = 0.01)
           .join(rdd_query)
           .map(f => (f._2._1, (f._1, f._2._2)))
           .join(rdd_corpus)
           .map(f => (f._2._1._1, f._1, f._2._1._2, f._2._2))
-          .map(f => (f._1, f._2, jaccard(f._3, f._4)))
-          .groupBy(f => f._1)
-          .map(f => average(f._2.map(t => t._3).toList))
-          .collect().toList)
+          .map(f => (f._1,(jaccard(f._3, f._4), 1)))
+          .reduceByKey((f,t) => (f._1+t._1, f._2+t._2))
+          .map(f => (f._2._1/f._2._2,1))
+          .reduce((f,t) => (f._1+t._1, f._2+t._2))
+        broadcast_res.unpersist()
+        val broadcast_d = tup._1/ tup._2
+
+        print(corpus_file, query_file, exact_d, base_d, balanced_d, broadcast_d)
 
         listOfRecords += Array("ExactNN", corpus_file, query_file, exact_d.toString)
         listOfRecords += Array("Base", corpus_file, query_file, base_d.toString)
         listOfRecords += Array("Balanced", corpus_file, query_file, balanced_d.toString)
         listOfRecords += Array("Broadcast", corpus_file, query_file, broadcast_d.toString)
+
+        csvWriter.writeAll(listOfRecords.toList)
+        spark.catalog.clearCache()
       }
     }
-    csvWriter.writeAll(listOfRecords.toList)
     outputFile.close()
   }
 }
