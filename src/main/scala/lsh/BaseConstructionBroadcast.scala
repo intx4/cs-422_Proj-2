@@ -22,6 +22,6 @@ class BaseConstructionBroadcast(sqlContext: SQLContext, data: RDD[(String, List[
 
     val hashQueries: RDD[(Int, String)] = minHash.execute(queries).map(f => f.swap)
 
-    hashQueries.map{case (id, name) => (name, broadcastBuckets.value.get(id).get)}
+    hashQueries.map{case (id, name) => (name, broadcastBuckets.value(id))}
   }
 }

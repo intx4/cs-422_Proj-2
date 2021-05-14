@@ -26,6 +26,7 @@ class BalancedPartitioner(partitions: Int, bounds: Array[Int]) extends Partition
         }
       }
     }
+    //values exceeding last bound are assigned to last partitionh
     if (assigned > partitions - 1){
       return partitions - 1
     }
@@ -61,7 +62,7 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
     // i.e: histogram = [(id1,1),(id2,3),(id3,1)]
     // partitions = 2
     // depth = ceil(5/2)=3
-    // bounds = [id2, id3] -> meaning [id1;id2], (id2;id3] = (id3)
+    // bounds = [id2, id3] -> meaning [id1;id2], (id2;id3] (but actually (id2; +inf) )
     var bounds = Array[Int]()
     var buffer = 0
     val depth = computeDepth(histogram)
