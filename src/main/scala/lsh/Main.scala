@@ -12,12 +12,22 @@ import au.com.bytecode.opencsv.CSVWriter
 import scala.collection.JavaConverters._
 
 object Main {
+  /*
   val conf = new SparkConf().setAppName("app").setMaster("local[*]")
   //conf.set("spark.executor.memory", "2g")
   //conf.set("spark.driver.memory", "2g")
   val sc = SparkContext.getOrCreate(conf)
   val sqlContext = new org.apache.spark.sql.SQLContext(sc)
   sc.setLogLevel("WARN")
+  */
+  val conf = new SparkConf()
+    .setAppName("app")
+    .set("spark.executor.memory", "16G")
+    .set("spark.shuffle.file.buffer", "16M")
+  val sc = SparkContext.getOrCreate(conf)
+  val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+  sc.setLogLevel("OFF")
 
   def generate(sc : SparkContext, input_file : String, output_file : String, fraction : Double) : Unit = {
     val rdd_corpus = sc
@@ -140,265 +150,6 @@ object Main {
     }
   }
 
-  def test_exact_nn_runtime() : Unit = {
-
-    val outputFile = new BufferedWriter(new FileWriter("./task8_tests/exactnn_time.csv"))
-    val csvWriter = new CSVWriter(outputFile)
-    val csvSchema = Array("corpus", "query", "duration")
-    var listOfRecords = new ListBuffer[Array[String]]()
-    listOfRecords += csvSchema
-
-    val corpus_file = corpus_files.head
-
-    val rdd_corpus = sc
-      .textFile(corpus_file)
-      .map(x => x.toString.split('|'))
-      .map(x => (x(0), x.slice(1, x.size).toList))
-
-    val exact = new ExactNN(sqlContext, rdd_corpus, 0.3)
-
-    for (query_file <- query_file_1){
-
-          val rdd_query = sc
-            .textFile(query_file)
-            .map(x => x.toString.split('|'))
-            .map(x => (x(0), x.slice(1, x.size).toList))
-
-          val tic = System.nanoTime()
-          val ground = exact.eval(rdd_query).count()
-          val toc = System.nanoTime()
-          val duration = (toc - tic) / 1e9d
-          print(corpus_file, query_file, duration.toString)
-
-          listOfRecords += Array(corpus_file, query_file, duration.toString)
-        }
-    csvWriter.writeAll(listOfRecords.toList.asJava)
-    outputFile.close()
-  }
-
-  def test_exact_nn_runtime_remote() : Unit = {
-
-    for (i <- corpus_files_r.indices) {
-      val corpus_file = corpus_files_r(i)
-
-      val rdd_corpus = sc
-        .textFile(corpus_file)
-        .map(x => x.toString.split('|'))
-        .map(x => (x(0), x.slice(1, x.size).toList))
-      val exact = new ExactNN(sqlContext, rdd_corpus, 3)
-
-      for (query_file <- query_files_r(i)) {
-
-        val rdd_query = sc
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
-
-
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query).count()
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
-        print(corpus_file, query_file, duration.toString)
-      }
-    }
-  }
-  def test_base_runtime_remote() : Unit = {
-
-    for (i <- corpus_files_r.indices) {
-      val corpus_file = corpus_files_r(i)
-
-      val rdd_corpus = sc
-        .textFile(corpus_file)
-        .map(x => x.toString.split('|'))
-        .map(x => (x(0), x.slice(1, x.size).toList)).cache()
-
-      for (query_file <- query_files_r(i)) {
-        val exact = new BaseConstruction(sqlContext, rdd_corpus, 3)
-
-        val rdd_query = sc
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
-
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query).count()
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
-        print(corpus_file, query_file, duration.toString)
-      }
-    }
-  }
-  def test_balanced_runtime_remote() : Unit = {
-
-    for (i <- corpus_files_r.indices) {
-      val corpus_file = corpus_files_r(i)
-
-      val rdd_corpus = sc
-        .textFile(corpus_file)
-        .map(x => x.toString.split('|'))
-        .map(x => (x(0), x.slice(1, x.size).toList)).cache()
-
-
-      for (query_file <- query_files_r(i)) {
-        val exact = new BaseConstructionBalanced(sqlContext, rdd_corpus, 3, partitions = 8)
-        val rdd_query = sc
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
-
-
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query).count()
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
-        print(corpus_file, query_file, duration.toString)
-      }
-    }
-  }
-  def test_broadcast_runtime_remote() : Unit = {
-
-    for (i <- corpus_files_r.indices) {
-      val corpus_file = corpus_files_r(i)
-
-      val rdd_corpus = sc
-        .textFile(corpus_file)
-        .map(x => x.toString.split('|'))
-        .map(x => (x(0), x.slice(1, x.size).toList)).cache()
-
-
-      for (query_file <- query_files_r(i)) {
-        val exact = new BaseConstructionBroadcast(sqlContext, rdd_corpus, 3)
-        val rdd_query = sc
-          .textFile(query_file)
-          .map(x => x.toString.split('|'))
-          .map(x => (x(0), x.slice(1, x.size).toList))
-
-
-        val tic = System.nanoTime()
-        val ground = exact.eval(rdd_query).count()
-        val toc = System.nanoTime()
-        val duration = (toc - tic) / 1e9d
-        print(corpus_file, query_file, duration.toString)
-      }
-    }
-  }
-  //@Test
-
-  def test_base_runtime() : Unit = {
-
-    val outputFile = new BufferedWriter(new FileWriter("./task8_tests/base_time.csv"))
-    val csvWriter = new CSVWriter(outputFile)
-    val csvSchema = Array("corpus", "query", "duration")
-    var listOfRecords = new ListBuffer[Array[String]]()
-    listOfRecords += csvSchema
-
-    for (i <- corpus_files.indices) {
-      val corpus_file = corpus_files(i)
-      val rdd_corpus = sc
-        .textFile(corpus_file)
-        .map(x => x.toString.split('|'))
-        .map(x => (x(0), x.slice(1, x.size).toList))
-      val base = new BaseConstruction(sqlContext, rdd_corpus, seed = 24)
-
-      for (query_file <- query_files(i)) {
-        for (j <- 0 to (5)) {
-          val rdd_query = sc
-            .textFile(query_file)
-            .map(x => x.toString.split('|'))
-            .map(x => (x(0), x.slice(1, x.size).toList))
-
-          val tic = System.nanoTime()
-          val ground = base.eval(rdd_query).count()
-          val toc = System.nanoTime()
-          val duration = (toc - tic) / 1e9d
-          print(corpus_file, query_file, duration.toString)
-
-          listOfRecords += Array(corpus_file, query_file, duration.toString)
-        }
-      }
-      rdd_corpus.unpersist()
-    }
-    csvWriter.writeAll(listOfRecords.toList.asJava)
-    outputFile.close()
-  }
-
-  def test_balanced_runtime() : Unit = {
-    val outputFile = new BufferedWriter(new FileWriter("./task8_tests/balanced_time.csv"))
-    val csvWriter = new CSVWriter(outputFile)
-    val csvSchema = Array("corpus", "query", "duration")
-    var listOfRecords = new ListBuffer[Array[String]]()
-    listOfRecords += csvSchema
-
-    for (i <- corpus_files.indices) {
-      val corpus_file = corpus_files(i)
-      val rdd_corpus = sc
-        .textFile(corpus_file)
-        .map(x => x.toString.split('|'))
-        .map(x => (x(0), x.slice(1, x.size).toList))
-      val base = new BaseConstructionBalanced(sqlContext, rdd_corpus, seed = 24, partitions = 8)
-      for (query_file <- query_files(i)) {
-        for (j <- 0 to (5)) {
-          val rdd_query = sc
-            .textFile(query_file)
-            .map(x => x.toString.split('|'))
-            .map(x => (x(0), x.slice(1, x.size).toList))
-
-
-          val tic = System.nanoTime()
-          val ground = base.eval(rdd_query).count()
-          val toc = System.nanoTime()
-          val duration = (toc - tic) / 1e9d
-          print(corpus_file, query_file, duration.toString)
-
-          listOfRecords += Array(corpus_file, query_file, duration.toString)
-        }
-      }
-      rdd_corpus.unpersist()
-    }
-    csvWriter.writeAll(listOfRecords.toList.asJava)
-    outputFile.close()
-  }
-
-  def test_broadcast_runtime() : Unit = {
-
-    val outputFile = new BufferedWriter(new FileWriter("./task8_tests/broadcast_time.csv"))
-    val csvWriter = new CSVWriter(outputFile)
-    val csvSchema = Array("corpus", "query", "duration")
-    var listOfRecords = new ListBuffer[Array[String]]()
-    listOfRecords += csvSchema
-
-    for (i <- corpus_files.indices) {
-      val corpus_file = corpus_files(i)
-      val rdd_corpus = sc
-        .textFile(corpus_file)
-        .map(x => x.toString.split('|'))
-        .map(x => (x(0), x.slice(1, x.size).toList))
-      val base = new BaseConstructionBroadcast(sqlContext, rdd_corpus, seed = 24)
-
-      for (query_file <- query_files(i)) {
-        for (j <- 0 to (5)) {
-          val rdd_query = sc
-            .textFile(query_file)
-            .map(x => x.toString.split('|'))
-            .map(x => (x(0), x.slice(1, x.size).toList))
-
-
-          val tic = System.nanoTime()
-          val ground = base.eval(rdd_query).count()
-          val toc = System.nanoTime()
-          val duration = (toc - tic) / 1e9d
-          println(corpus_file, query_file, duration.toString)
-
-          listOfRecords += Array(corpus_file, query_file, duration.toString)
-        }
-      }
-      rdd_corpus.unpersist()
-    }
-    csvWriter.writeAll(listOfRecords.toList.asJava)
-    outputFile.close()
-  }
-
   def compute_average(rdd: RDD[(String,Set[String])], rdd_query: RDD[(String, List[String])], rdd_corpus: RDD[(String, List[String])]) : Double = {
       rdd.flatMapValues(f => f.toList)
       .join(rdd_query)
@@ -407,7 +158,7 @@ object Main {
       .map{ case (neigh, (keywq, keywd)) => (keywq, keywd) }
       .map(f =>1.0 - jaccard(f._1, f._2)).mean()
   }
-  //@Test
+  //@Tes
   def test_accuracy(): Unit = {
     val outputFile = new BufferedWriter(new FileWriter("./task8_tests/accuracy.csv"))
     val csvWriter = new CSVWriter(outputFile)
@@ -668,20 +419,49 @@ object Main {
     }
   }
 
+  def test_extreme_skew(): Unit ={
+    val corpus_file = "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/corpus-skewplusplus.csv/part-00000"
+
+    val rdd_corpus_fragment = sc
+      .textFile(corpus_file)
+      .map(x => x.toString.split('|'))
+      .map(x => (x(0), x.slice(1, x.size).toList))
+      .repartition(2)
+      .cache()
+
+    val rdd_corpus = ((1 to 10).map(x => rdd_corpus_fragment).reduce(_ ++ _)).repartition(2)
+
+    val query_file = "hdfs://iccluster041.iccluster.epfl.ch:8020/cs422-data/queries-skewplusplus.csv/part-00000"
+    val rdd_query = sc
+      .textFile(query_file)
+      .map(x => x.toString.split('|'))
+      .map(x => (x(0), x.slice(1, x.size).toList))
+      .repartition(8)
+      .cache()
+
+    println(rdd_corpus.count() + rdd_query.count())
+
+    val lsh1 = new BaseConstruction(sqlContext, rdd_corpus, 42)
+    val lsh2 = new BaseConstructionBalanced(sqlContext, rdd_corpus, 42, 8)
+
+    for (i <- 1 to 10) {
+      val t1 = System.nanoTime
+
+      val res2 = lsh1.eval(rdd_query).flatMap(x => x._2).count()
+
+      val duration1 = (System.nanoTime - t1) / 1e9d
+
+      val t2 = System.nanoTime
+
+      val res1 = lsh2.eval(rdd_query).flatMap(x => x._2).count()
+
+      val duration2 = (System.nanoTime - t2) / 1e9d
+
+      println(duration1, "Base")
+      println(duration2, "Balanced")
+    }
+  }
   def main(args: Array[String]) {
-    val remote = true
-    if (!remote) {
-      //test_exact_nn_runtime()
-      //test_base_runtime()
-      //test_balanced_runtime()
-      //test_broadcast_runtime()
-      test_accuracy_remote()
+      test_extreme_skew()
     }
-    else{
-      //println("test average distance")
-      //test_base_average_distance_remote()
-      println("test acuracy #############")
-      test_accuracy_remote()
-    }
-  }     
 }

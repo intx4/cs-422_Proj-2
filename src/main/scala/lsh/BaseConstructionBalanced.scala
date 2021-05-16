@@ -26,7 +26,7 @@ class BalancedPartitioner(partitions: Int, bounds: Array[Int]) extends Partition
         }
       }
     }
-    //values exceeding last bound are assigned to last partitionh
+    //values exceeding last bound are assigned to last partition
     if (assigned > partitions - 1){
       return partitions - 1
     }
@@ -41,13 +41,11 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
   val buckets: RDD[(Int, Set[String])] = minHash.execute(data)
     .groupBy{case (name, id) => id}
     .mapValues(f => f.map(_._1).toSet)
-    .cache()
 
   def computeMinHashHistogram(queries: RDD[(String, Int)]): Array[(Int, Int)] = {
     // compute histogram for target buckets of queries
     // return histogram sorted by hashmin key ASC as <id, number>
-    queries.groupBy(f => f._2).mapValues(f => f.toArray.length)
-      .sortByKey(ascending = true).collect()
+    queries.map(f => (f._2, 1)).reduceByKey(_+_).sortByKey(ascending = true).collect()
   }
 
   def computeDepth(histogram: Array[(Int, Int)]): Int = {
@@ -106,7 +104,6 @@ class BaseConstructionBalanced(sqlContext: SQLContext, data: RDD[(String, List[S
       .join(partitionedBuckets)
       .map{ case (id, (qname, neighs)) => (qname, neighs)}
 
-    //see partitionJoin
     joinedRdd
   }
 }
