@@ -86,6 +86,12 @@ object Main {
   }
 
   //----------------------------------------------------TASK 8 TESTS-------------------------------------------------
+  // Feel free to have a look. Some tests were changed to repair specific failures
+  // in run due to Out of memory errors, so they might not reflect the original tests
+  // from wich measurements were taken for the report. Still, I wanted to keep them,
+  // especially the average distance ones, since I had to optimize them quite a bit to solve
+  // the aformentioned problems
+
   var corpus_files = List[String]()
   corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-1.csv"
   corpus_files :+= "/home/intx/cs-422/bis/src/main/resources/corpus-10.csv"
